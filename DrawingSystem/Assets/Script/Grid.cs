@@ -42,15 +42,16 @@ public class Grid  : MonoBehaviour
 	private GameObject clickedImage;
 	private GameObject onEnterImage;
 	private GameObject onExitImage;
+	private GameObject onDownImage;
 
-	public Color onColor = Color.green;
-	public Color offColor = Color.black;
+	private Color onColor = Color.green;
+	private Color offColor = Color.black;
 
 	private int width = 300;
 	private int height = 663;
 
 	private bool takeShot = false;
-
+	private bool draw = true;
 
 	void Awake () {
 
@@ -76,6 +77,7 @@ public class Grid  : MonoBehaviour
 		}
 
 		setGrid ();
+		changeColor ();
 
 	}
 
@@ -92,7 +94,7 @@ public class Grid  : MonoBehaviour
 
 	void OnRandomColorEvent (){
 
-		onColor = ExtensionMethods.RandomColor ();
+		changeColor ();
 	}
 
 
@@ -110,14 +112,14 @@ public class Grid  : MonoBehaviour
 
 		clearButton.GetComponent<Image>().color = Color.white;
 		captureButton.GetComponent<Image>().color = Color.white;
-		colorButton.GetComponent<Image>().color = Color.white;
+		//colorButton.GetComponent<Image>().color = Color.white;
 
-//		if (Input.GetKeyDown(KeyCode.Space)){
-//
-//			clearGridColors ();
-//		}
-//
-//
+		if (Input.GetKeyDown(KeyCode.Space)){
+
+			changeColor();
+		}
+
+
 //		if (Input.GetKeyDown (KeyCode.S)) {
 //
 //			StartCoroutine ("capture");
@@ -129,6 +131,15 @@ public class Grid  : MonoBehaviour
 //
 //		}
 
+
+		if (Input.GetKeyDown(KeyCode.D)){
+
+			draw = true;
+		}
+		if (Input.GetKeyUp(KeyCode.D)){
+
+			draw = false;
+		}
 
 	}
 
@@ -142,8 +153,8 @@ public class Grid  : MonoBehaviour
 
 		backgroundTexture = new Texture2D(width, height, TextureFormat.ARGB32, false);
 		backgroundTexture.name = "background";
-
 		backgroundTexture.Apply ();
+
 
 	}
 	void OnGUI(){
@@ -157,7 +168,6 @@ public class Grid  : MonoBehaviour
 
 			GUI.DrawTexture(new Rect( 10, 10, 100, 100), screenCap, ScaleMode.StretchToFill); //result
 		}
-
 
 	}
 
@@ -203,6 +213,13 @@ public class Grid  : MonoBehaviour
 
 	}
 
+	void changeColor(){
+
+		onColor = ExtensionMethods.RandomColor ();
+		colorButton.GetComponent<Image> ().color = onColor;
+
+	}
+
 	void clearGridColors(){
 
 		if (images.Count > 0) {
@@ -219,15 +236,15 @@ public class Grid  : MonoBehaviour
 	public void OnPointerClick(PointerEventData eventData) // 3
 	{
 		
-//		clickedImage = eventData.pointerPressRaycast.gameObject;
-//
-//		if (clickedImage.name != "background" || clickedImage.name != "ClearButton" || clickedImage.name != "CaptureButton") {
-//			
-//			print (eventData.pointerPressRaycast.gameObject.name + "  children: " + clickedImage.transform.childCount);
-//
-//			Color rand = ExtensionMethods.RandomColor ();
-//			clickedImage.GetComponent<Image> ().color = rand;
-//		}
+		clickedImage = eventData.pointerPressRaycast.gameObject;
+
+
+		if (!draw) {
+			if (clickedImage.name != "RandomColorButton" || clickedImage.name != "ClearButton" || clickedImage.name != "CaptureButton") {
+
+				clickedImage.GetComponent<Image> ().color = offColor;
+			}
+		}
 
 	}
 
@@ -238,28 +255,45 @@ public class Grid  : MonoBehaviour
 
 		onEnterImage = eventData.pointerEnter.gameObject;
 
-		if (onEnterImage.name != "ClearButton" || onEnterImage.name != "CaptureButton") {
-			onEnterImage.GetComponent<Image> ().color = onColor;
-		} else {
+			
+		if (draw) {
+			if (onEnterImage.name != "ClearButton" || onEnterImage.name != "CaptureButton" || onEnterImage.name != "RandomColorButton") {
+				onEnterImage.GetComponent<Image> ().color = onColor;
+			} else {
 
-			onEnterImage.GetComponent<Image> ().color = Color.white;
+				onEnterImage.GetComponent<Image> ().color = offColor;
+			}
 		}
 
 
 	}
 	public void OnPointerExit (PointerEventData eventData)
 	{
-		Debug.Log ("OnPointerExit"+ eventData.pointerEnter.gameObject.name);
+		
 
-//		onExitImage = eventData.pointerEnter.gameObject;
-//		onExitImage.GetComponent<Image> ().color = onColor;
+		onExitImage = eventData.pointerEnter.gameObject;
+		Debug.Log ("OnPointerExit"+ onExitImage.name);
 
+		if (draw) {
+		
+			if (onExitImage.name != "ClearButton" || onExitImage.name != "CaptureButton" || onExitImage.name != "RandomColorButton") {
+				onExitImage.GetComponent<Image> ().color = onColor;
+			} else {
+
+				onExitImage.GetComponent<Image> ().color = offColor;
+			}
+		}
+			
 
 	}
 
 	public void OnPointerDown (PointerEventData eventData)
 	{
-		Debug.Log ("OnPointerDown");
+		
+		onDownImage = eventData.pointerPressRaycast.gameObject;
+		Debug.Log ("OnPointerDown "+onDownImage.name);
+
+
 	}
 	public void OnPointerUp (PointerEventData eventData)
 	{
